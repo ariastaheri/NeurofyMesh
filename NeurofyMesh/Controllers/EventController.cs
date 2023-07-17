@@ -33,7 +33,7 @@ namespace NeurofyMesh.Controllers
             return result != null ? Ok(result) : NotFound($"id not found in the database");
         }
 
-        [HttpGet("/vendor/{id}")]
+        [HttpGet("vendor/{id}")]
         public ActionResult<Event> GetEventByVendorId([FromRoute] int id)
         {
             if (id <= 0)
@@ -57,13 +57,13 @@ namespace NeurofyMesh.Controllers
             return result != null ? Ok(result) : BadRequest();
         }
 
-        [HttpPost("/ttn-uplink")]
+        [HttpPost("ttn-uplink")]
         [Consumes("application/json")]
-        public async Task<ActionResult<Event>> TtnUplink([FromBody] TtnUplink uplinkData)
+        public async Task<ActionResult<List<Event>>> TtnUplink([FromBody] TtnUplink uplinkData)
         {
-            if (uplinkData == null) 
+            if (uplinkData == null || uplinkData.uplink_message == null  || uplinkData.end_device_ids == null) 
             {
-                return BadRequest();
+                return BadRequest("some of the required values were null!");
             }
 
             var result = _eventDataService.DecodeUplinkData(uplinkData);
