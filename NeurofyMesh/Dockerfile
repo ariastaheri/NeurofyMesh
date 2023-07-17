@@ -19,7 +19,7 @@ WORKDIR /app
 COPY --from=build /app/out .
 
 # Expose port 80 for the application
-EXPOSE 80
+EXPOSE 5000
 
 # Define the entrypoint of the application
 ENTRYPOINT ["dotnet", "NeurofyMesh.dll"]
