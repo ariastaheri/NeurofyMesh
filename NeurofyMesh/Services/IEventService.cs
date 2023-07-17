@@ -11,5 +11,6 @@ namespace NeurofyMesh.Services
         Task<bool> UpdateEventById(int id, Event eventData);
         Task<bool> DeleteEvent(int id);
         Task<Event> CreateEvent(Event eventData);
+        List<Event> DecodeUplinkData(TtnUplink uplinkData);
     }
 }

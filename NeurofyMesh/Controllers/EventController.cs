@@ -57,6 +57,31 @@ namespace NeurofyMesh.Controllers
             return result != null ? Ok(result) : BadRequest();
         }
 
+        [HttpPost("/ttn-uplink")]
+        [Consumes("application/json")]
+        public async Task<ActionResult<Event>> TtnUplink([FromBody] TtnUplink uplinkData)
+        {
+            if (uplinkData == null) 
+            {
+                return BadRequest();
+            }
+
+            var result = _eventDataService.DecodeUplinkData(uplinkData);
+
+            List<Event> createdEvents = new List<Event>();
+
+            bool allEventsCreated = true;
+
+            foreach(var item in result)
+            {
+                var output = await _eventDataService.CreateEvent(item);
+                if(output != null)
+                    createdEvents.Add(output);
+                else allEventsCreated = false;
+            }
+            return createdEvents != null && allEventsCreated ? Ok(createdEvents) : BadRequest("Not all events are created");
+        }
+
         // Update a vendor
         [HttpPut("{id}")]
         [Consumes("application/json")]
