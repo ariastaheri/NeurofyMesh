@@ -31,6 +31,61 @@ namespace NeurofyMesh.Services
             return newEvent.Entity;
         }
 
+        public List<Event> DecodeUplinkData(TtnUplink uplinkData)
+        {
+            List<Event> events = new List<Event>();
+            if(uplinkData.uplink_message.decoded_payload.Gps_Coordinates != null &&
+                !String.IsNullOrEmpty(uplinkData.uplink_message.decoded_payload.Gps_Coordinates.latitude) &&
+                !String.IsNullOrEmpty(uplinkData.uplink_message.decoded_payload.Gps_Coordinates.longitude))
+            {
+                Event gps_event = new Event
+                {
+                    DeviceId = uplinkData.end_device_ids.device_id,
+                    EventType = EventType.GpsCoordinates,
+                    Value = $"{uplinkData.uplink_message.decoded_payload.Gps_Coordinates.latitude}, {uplinkData.uplink_message.decoded_payload.Gps_Coordinates.longitude}",
+                    DateTime = DateTime.Now,
+                };
+                events.Add(gps_event);
+            }
+            if(uplinkData.uplink_message.decoded_payload.Measurements != null &&
+                uplinkData.uplink_message.decoded_payload.Measurements.temperature != null)
+            {
+                Event temp_event = new Event
+                {
+                    DeviceId = uplinkData.end_device_ids.device_id,
+                    EventType = EventType.Temperature,
+                    Value = $"{uplinkData.uplink_message.decoded_payload.Measurements.temperature}",
+                    DateTime = DateTime.Now,
+                };
+                events.Add(temp_event);
+            }
+            if (uplinkData.uplink_message.decoded_payload.Measurements != null &&
+                uplinkData.uplink_message.decoded_payload.Measurements.humidity != null)
+            {
+                Event humidity_event = new Event
+                {
+                    DeviceId = uplinkData.end_device_ids.device_id,
+                    EventType = EventType.Humidity,
+                    Value = $"{uplinkData.uplink_message.decoded_payload.Measurements.humidity}%",
+                    DateTime = DateTime.Now,
+                };
+                events.Add(humidity_event);
+            }
+            if (uplinkData.uplink_message.decoded_payload.touchSensorPressed != null)
+            {
+                Event sensor_event = new Event
+                {
+                    DeviceId = uplinkData.end_device_ids.device_id,
+                    EventType = EventType.TouchSensor,
+                    Value = $"{uplinkData.uplink_message.decoded_payload.touchSensorPressed}",
+                    DateTime = DateTime.Now,
+                };
+                events.Add(sensor_event);
+            }
+
+            return events;
+        }
+
         public async Task<bool> DeleteEvent(int id)
         {
             var eventData = _context.Events.Where(v => v.EventId == id).FirstOrDefault();

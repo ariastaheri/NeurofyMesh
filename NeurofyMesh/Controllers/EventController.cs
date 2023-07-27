@@ -33,7 +33,7 @@ namespace NeurofyMesh.Controllers
             return result != null ? Ok(result) : NotFound($"id not found in the database");
         }
 
-        [HttpGet("/vendor/{id}")]
+        [HttpGet("vendor/{id}")]
         public ActionResult<Event> GetEventByVendorId([FromRoute] int id)
         {
             if (id <= 0)
@@ -55,6 +55,31 @@ namespace NeurofyMesh.Controllers
 
             var result = await _eventDataService.CreateEvent(eventData);
             return result != null ? Ok(result) : BadRequest();
+        }
+
+        [HttpPost("ttn-uplink")]
+        [Consumes("application/json")]
+        public async Task<ActionResult<List<Event>>> TtnUplink([FromBody] TtnUplink uplinkData)
+        {
+            if (uplinkData == null || uplinkData.uplink_message == null  || uplinkData.end_device_ids == null) 
+            {
+                return BadRequest("some of the required values were null!");
+            }
+
+            var result = _eventDataService.DecodeUplinkData(uplinkData);
+
+            List<Event> createdEvents = new List<Event>();
+
+            bool allEventsCreated = true;
+
+            foreach(var item in result)
+            {
+                var output = await _eventDataService.CreateEvent(item);
+                if(output != null)
+                    createdEvents.Add(output);
+                else allEventsCreated = false;
+            }
+            return createdEvents != null && allEventsCreated ? Ok(createdEvents) : BadRequest("Not all events are created");
         }
 
         // Update a vendor
